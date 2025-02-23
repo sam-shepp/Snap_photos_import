@@ -20,7 +20,7 @@ def mp4_update_metadata(file_path):
 
     if match:
         year, month, day = match.groups()
-        print(f"Year: {year}, Month: {month}, Day: {day}")
+        #print(f"Year: {year}, Month: {month}, Day: {day}")
 
         # Convert to MP4 date format (YYYY-MM-DDTHH:MM:SSZ)
         new_date = f"{year}-{month}-{day}T00:00:00Z"
@@ -67,24 +67,27 @@ def overlay_png_on_jpeg(jpeg_path, png_path, processed_folder):
         overlay = Image.open(png_path).convert("RGBA").resize(image.size, Image.ANTIALIAS)
         # Blend images
         combined = Image.alpha_composite(image, overlay)
-        output_path = os.path.join(processed_folder, os.path.basename(jpeg_path).replace(".jpg", "_overlay.jpg"))
+        output_path = os.path.join(processed_folder, os.path.basename(jpeg_path).replace(".jpg", "_combined.jpg"))
         Image.alpha_composite(image, overlay).convert("RGB").save(output_path, "JPEG")
 
-def overlay_png_on_mp4(mp4_path, png_path):
-    """Overlay a PNG onto an MP4 using FFmpeg."""
-    if os.path.exists(png_path):
-        output_path = mp4_path.replace(".mp4", "_combined.mp4")
-        
-        # Use FFmpeg to overlay the PNG onto the MP4 without specifying audio_codec
-        ffmpeg.input(mp4_path).output(output_path, vf=f"movie={png_path} [watermark]; [in][watermark] overlay=0:0 [out]").run(overwrite_output=True)
-            
-        #print(f"Overlay added to MP4: {output_path}")
 
 def overlay_png_on_mp4(mp4_path, png_path, processed_folder):
-    """Overlay PNG on MP4 and save in processed folder."""
+    """Overlay a resized PNG onto an MP4 and save in processed folder (quiet mode)."""
     if os.path.exists(png_path):
         output_path = os.path.join(processed_folder, os.path.basename(mp4_path).replace(".mp4", "_combined.mp4"))
-        ffmpeg.input(mp4_path).output(output_path, vf=f"movie={png_path} [watermark]; [in][watermark] overlay=0:0 [out]").run(overwrite_output=True)
+
+        # Get MP4 resolution
+        probe = ffmpeg.probe(mp4_path)
+        video_stream = next((stream for stream in probe["streams"] if stream["codec_type"] == "video"), None)
+        if video_stream:
+            width = video_stream["width"]
+            height = video_stream["height"]
+
+            # Use FFmpeg to scale the overlay to match the MP4 resolution
+            ffmpeg.input(mp4_path).output(
+                output_path,
+                vf=f"[0:v]scale={width}:{height}[video]; movie={png_path},scale={width}:{height}[watermark]; [video][watermark] overlay=0:0",
+            ).global_args('-loglevel', 'quiet').run(overwrite_output=True)
 
 def select_folder():
     """Prompt user to select a folder."""
@@ -138,8 +141,6 @@ with tqdm(total=len(all_files), desc="Processing Files", unit="file") as pbar:
             if os.path.exists(png_path):  # Check if PNG file exists
                 overlay_png_on_jpeg(full_path, png_path, processed_folder)
             processed_jpeg += 1
-        
-
 
         pbar.update(1)
 
