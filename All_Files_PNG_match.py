@@ -138,6 +138,7 @@ count = 0
 processed_mp4 = 0
 processed_jpeg = 0
 skipped = 0
+skipped_files = []
 
 # Process files with a progress bar
 with tqdm(total=len(all_files), desc="Processing Files", unit="file") as pbar:
@@ -165,6 +166,7 @@ with tqdm(total=len(all_files), desc="Processing Files", unit="file") as pbar:
                 processed_jpeg += 1
         except:
             print(f'skipping: {file_name}')
+            skipped_files.append(file_name)
             skipped = skipped + 1
 
 
@@ -174,3 +176,6 @@ print(f"Total MP4 files processed: {processed_mp4}")
 print(f"Total JPEG files processed: {processed_jpeg}")
 print(f"Total files processed: {processed_mp4 + processed_jpeg}")
 print(f"Total files skipped: {skipped}")
+
+print('skipped files:')
+print(skipped_files)

@@ -34,29 +34,4 @@ def overlay_png_on_mp4(mp4_path, png_path, processed_folder):
             print(f"MP4 Dimensions: {width}x{height}")
 
             if width > height:
-                # Use FFmpeg to scale the overlay to match the MP4 resolution
-                ffmpeg.input(mp4_path).output(
-                    processing_path,
-                    vf=f"[0:v]scale={height}:{width}[video]; movie={png_path},scale={height}:{width}[watermark]; [video][watermark] overlay=0:0",
-                ).global_args('-loglevel', 'error').run(overwrite_output=True)
-
-                print('finished processing file')
-            else:
-                # Use FFmpeg to scale the overlay to match the MP4 resolution
-                ffmpeg.input(mp4_path).output(
-                    processing_path,
-                    vf=f"[0:v]scale={width}:{height}[video]; movie={png_path},scale={width}:{height}[watermark]; [video][watermark] overlay=0:0",
-                ).global_args('-loglevel', 'error').run(overwrite_output=True)
-
-                print('finished processing file')
-
-
-mp4_path = '/Users/samsheppard/Documents/2018-06-21_966C9469-B6C6-4643-88FA-450CBE45DEDA-main.mp4'
-png_path = '/Users/samsheppard/Documents/2018-06-21_966C9469-B6C6-4643-88FA-450CBE45DEDA-overlay.png'
-
-overlay_png_on_mp4(mp4_path, png_path, processed_folder) 
-
-mp4_path = '/Users/samsheppard/Documents/2023-06-03_D8C9A173-D177-4C1B-8D1C-C0B1E0680EB3-main.mp4'
-png_path = '/Users/samsheppard/Documents/2023-06-03_D8C9A173-D177-4C1B-8D1C-C0B1E0680EB3-overlay.png'
-
-overlay_png_on_mp4(mp4_path, png_path, processed_folder) 
+                # Use FFmpeg to scale the overlay to match
