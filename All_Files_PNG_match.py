@@ -62,19 +62,25 @@ def jpeg_update_metadata(file_name):
 
 def overlay_png_on_jpeg(jpeg_path, png_path, processed_folder):
     """Overlay PNG on JPEG and save in processed folder."""
+    output_path = os.path.join(processed_folder, os.path.basename(jpeg_path).replace("-main.jpg", "_combined.jpg"))
+    
     if os.path.exists(png_path):
         image = Image.open(jpeg_path).convert("RGBA")
         overlay = Image.open(png_path).convert("RGBA").resize(image.size, Image.ANTIALIAS)
         # Blend images
         combined = Image.alpha_composite(image, overlay)
-        output_path = os.path.join(processed_folder, os.path.basename(jpeg_path).replace(".jpg", "_combined.jpg"))
         Image.alpha_composite(image, overlay).convert("RGB").save(output_path, "JPEG")
+    else:
+        print(f'no associated png file for {jpeg_path}')
+        shutil.copy(jpeg_path, output_path) 
 
 
 def overlay_png_on_mp4(mp4_path, png_path, processed_folder):
     """Overlay a resized PNG onto an MP4 and save in processed folder (quiet mode)."""
+    processing_path = os.path.join(processed_folder, os.path.basename(mp4_path).replace("-main.mp4", "_combined.mp4"))
+
     if os.path.exists(png_path):
-        output_path = os.path.join(processed_folder, os.path.basename(mp4_path).replace(".mp4", "_combined.mp4"))
+        print(f'processing_path: {processing_path}')
 
         # Get MP4 resolution
         probe = ffmpeg.probe(mp4_path)
@@ -82,12 +88,27 @@ def overlay_png_on_mp4(mp4_path, png_path, processed_folder):
         if video_stream:
             width = video_stream["width"]
             height = video_stream["height"]
+            print(f"MP4 Dimensions: {width}x{height}")
 
-            # Use FFmpeg to scale the overlay to match the MP4 resolution
-            ffmpeg.input(mp4_path).output(
-                output_path,
-                vf=f"[0:v]scale={width}:{height}[video]; movie={png_path},scale={width}:{height}[watermark]; [video][watermark] overlay=0:0",
-            ).global_args('-loglevel', 'quiet').run(overwrite_output=True)
+            if width > height:
+                # Use FFmpeg to scale the overlay to match the MP4 resolution
+                ffmpeg.input(mp4_path).output(
+                    processing_path,
+                    vf=f"[0:v]scale={height}:{width}[video]; movie={png_path},scale={height}:{width}[watermark]; [video][watermark] overlay=0:0",
+                ).global_args('-loglevel', 'error').run(overwrite_output=True)
+
+                print('finished processing file')
+            else:
+                # Use FFmpeg to scale the overlay to match the MP4 resolution
+                ffmpeg.input(mp4_path).output(
+                    processing_path,
+                    vf=f"[0:v]scale={width}:{height}[video]; movie={png_path},scale={width}:{height}[watermark]; [video][watermark] overlay=0:0",
+                ).global_args('-loglevel', 'error').run(overwrite_output=True)
+
+                print('finished processing file')
+    else:
+        print(f'no associated png file for {mp4_path}')
+        shutil.copy(mp4_path, processing_path)
 
 def select_folder():
     """Prompt user to select a folder."""
@@ -116,6 +137,7 @@ total_files = len(all_files)
 count = 0
 processed_mp4 = 0
 processed_jpeg = 0
+skipped = 0
 
 # Process files with a progress bar
 with tqdm(total=len(all_files), desc="Processing Files", unit="file") as pbar:
@@ -124,28 +146,31 @@ with tqdm(total=len(all_files), desc="Processing Files", unit="file") as pbar:
         full_path = os.path.join(folder_path, file_name)
         count += 1
         print(f"\nProcessing file {count}/{total_files}: {file_name}")
-
-        # Process accordingly
-        if file_name.lower().endswith(".mp4"):
-            mp4_update_metadata(full_path)
-            # Find corresponding PNG overlay
-            png_path = full_path.replace("-main.mp4", "-overlay.png")
-            if os.path.exists(png_path):  # Check if PNG file exists
-                overlay_png_on_mp4(full_path, png_path, processed_folder)
-            processed_mp4 += 1
-
-        elif file_name.lower().endswith((".jpg")):
-            jpeg_update_metadata(full_path)
-            # Find corresponding PNG overlay
-            png_path = full_path.replace("-main.jpg", "-overlay.png")
-            if os.path.exists(png_path):  # Check if PNG file exists
-                overlay_png_on_jpeg(full_path, png_path, processed_folder)
-            processed_jpeg += 1
-
         pbar.update(1)
+
+        try:
+            # Process accordingly
+            if file_name.lower().endswith(".mp4"):
+                mp4_update_metadata(full_path)
+                # Find corresponding PNG overlay
+                png_path = full_path.replace("-main.mp4", "-overlay.png")
+                overlay_png_on_mp4(full_path, png_path, processed_folder)
+                processed_mp4 += 1
+
+            elif file_name.lower().endswith((".jpg")):
+                jpeg_update_metadata(full_path)
+                # Find corresponding PNG overlay
+                png_path = full_path.replace("-main.jpg", "-overlay.png")
+                overlay_png_on_jpeg(full_path, png_path, processed_folder)
+                processed_jpeg += 1
+        except:
+            print(f'skipping: {file_name}')
+            skipped = skipped + 1
+
 
 # Print final summary
 print("\nProcessing complete!")
 print(f"Total MP4 files processed: {processed_mp4}")
 print(f"Total JPEG files processed: {processed_jpeg}")
 print(f"Total files processed: {processed_mp4 + processed_jpeg}")
+print(f"Total files skipped: {skipped}")
