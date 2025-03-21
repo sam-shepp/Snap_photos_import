@@ -34,7 +34,7 @@ def mp4_update_metadata(file_path):
         # Save changes
         mp4_file.save()
 
-        #print("Date change complete.")
+        print("Date change complete.")
     else:
         print("No matching date pattern found in the filename.")
 
@@ -55,7 +55,7 @@ def jpeg_update_metadata(file_name):
         exif_bytes = piexif.dump(exif_dict)
         piexif.insert(exif_bytes, file_name)
         #print when complete
-        #print('Date change complete')
+        print('Date change complete')
     else:
         print("No matching pattern found in the filename.")
 
@@ -66,10 +66,11 @@ def overlay_png_on_jpeg(jpeg_path, png_path, processed_folder):
     
     if os.path.exists(png_path):
         image = Image.open(jpeg_path).convert("RGBA")
-        overlay = Image.open(png_path).convert("RGBA").resize(image.size, Image.ANTIALIAS)
+        overlay = Image.open(png_path).convert("RGBA").resize(image.size, Image.LANCZOS)
         # Blend images
         combined = Image.alpha_composite(image, overlay)
         Image.alpha_composite(image, overlay).convert("RGB").save(output_path, "JPEG")
+        print("overlay added")
     else:
         print(f'no associated png file for {jpeg_path}')
         shutil.copy(jpeg_path, output_path) 
