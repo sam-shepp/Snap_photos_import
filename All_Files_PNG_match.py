@@ -75,6 +75,9 @@ def overlay_png_on_jpeg(jpeg_path, png_path, processed_folder):
         print(f'no associated png file for {jpeg_path}')
         shutil.copy(jpeg_path, output_path) 
 
+    return output_path
+
+
 
 def overlay_png_on_mp4(mp4_path, png_path, processed_folder):
     """Overlay a resized PNG onto an MP4 and save in processed folder (quiet mode)."""
@@ -110,6 +113,8 @@ def overlay_png_on_mp4(mp4_path, png_path, processed_folder):
     else:
         print(f'no associated png file for {mp4_path}')
         shutil.copy(mp4_path, processing_path)
+
+    return processing_path
 
 def select_folder():
     """Prompt user to select a folder."""
@@ -153,17 +158,17 @@ with tqdm(total=len(all_files), desc="Processing Files", unit="file") as pbar:
         try:
             # Process accordingly
             if file_name.lower().endswith(".mp4"):
-                mp4_update_metadata(full_path)
                 # Find corresponding PNG overlay
                 png_path = full_path.replace("-main.mp4", "-overlay.png")
-                overlay_png_on_mp4(full_path, png_path, processed_folder)
+                new_path = overlay_png_on_mp4(full_path, png_path, processed_folder)
+                mp4_update_metadata(new_path)
                 processed_mp4 += 1
 
             elif file_name.lower().endswith((".jpg")):
-                jpeg_update_metadata(full_path)
                 # Find corresponding PNG overlay
                 png_path = full_path.replace("-main.jpg", "-overlay.png")
-                overlay_png_on_jpeg(full_path, png_path, processed_folder)
+                new_path = overlay_png_on_jpeg(full_path, png_path, processed_folder)
+                jpeg_update_metadata(new_path)
                 processed_jpeg += 1
         except:
             print(f'skipping: {file_name}')
