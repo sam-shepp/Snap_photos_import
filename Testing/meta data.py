@@ -11,30 +11,51 @@ from tkinter import filedialog
 from tqdm import tqdm
 
 def mp4_update_metadata(file_path):
+    """Extract date from filename and update MP4 metadata."""
     # Extract filename without the path
     file_name = os.path.basename(file_path)
-    
+
     # Extracting date using regular expressions (YYYY-MM-DD)
     pattern = r'(\d{4})-(\d{2})-(\d{2})'
     match = re.search(pattern, file_name)
 
     if match:
         year, month, day = match.groups()
-        #print(f"Year: {year}, Month: {month}, Day: {day}")
+        print(f"Year: {year}, Month: {month}, Day: {day}")
 
-        # Convert to MP4 date format (YYYY-MM-DDTHH:MM:SSZ)
-        new_date = f"{year}-{month}-{day}T00:00:00Z"
+        # Convert to MP4 date format (ISO 8601: YYYY-MM-DDTHH:MM:SS)
+        new_date = f"{year}-{month}-{day}T00:00:00"
 
-        # Load MP4 file metadata
-        mp4_file = MP4(file_path)
+        # Verify file is MP4
+        if not file_path.lower().endswith(".mp4"):
+            print(f"Skipping non-MP4 file: {file_path}")
+            return
 
-        # Update the creation date metadata
-        mp4_file["\xa9day"] = new_date
+        # Use FFmpeg to update metadata
+        try:
+            # FFmpeg command to set creation_time metadata
+            output_path = file_path.replace(".mp4", "_dated.mp4")
 
-        # Save changes
-        mp4_file.save()
+            (
+                ffmpeg
+                .input(file_path)
+                .output(
+                    output_path,
+                    metadata=f"creation_time={new_date}",
+                    codec="copy"  # Copy streams without re-encoding
+                )
+                .global_args('-loglevel', 'error')  # Suppress unnecessary logs
+                .run(overwrite_output=True)
+            )
 
-        print("Date change complete.")
+            print(f"Metadata updated successfully: {output_path}")
+
+            # Replace original file with the updated one
+            os.replace(output_path, file_path)
+
+        except ffmpeg.Error as e:
+            print(f"FFmpeg error: {e.stderr.decode()}")
+
     else:
         print("No matching date pattern found in the filename.")
 
@@ -123,3 +144,27 @@ print(f"Total files skipped: {skipped}")
 
 print('skipped files:')
 print(skipped_files)
+
+print('retrying skipped files')
+# Process files with a progress bar
+with tqdm(total=len(skipped_files), desc="Processing Files", unit="file") as pbar:
+    # Loop through files in the folder
+    for file_name in skipped_files:
+        full_path = os.path.join(folder_path, file_name)
+        count += 1
+        print(f"\nProcessing file {count}/{total_files}: {file_name}")
+        pbar.update(1)
+
+        try:
+            # Process accordingly
+            if file_name.lower().endswith(".mp4"):
+                mp4_update_metadata(full_path)
+                processed_mp4 += 1
+
+            elif file_name.lower().endswith((".jpg")):
+                jpeg_update_metadata(full_path)
+                processed_jpeg += 1
+        except:
+            print(f'skipping: {file_name}')
+            skipped_files.append(file_name)
+            skipped = skipped + 1

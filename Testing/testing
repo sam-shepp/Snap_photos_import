@@ -60,22 +60,3 @@ mp4_path = '/Users/samsheppard/Documents/2023-06-03_D8C9A173-D177-4C1B-8D1C-C0B1
 png_path = '/Users/samsheppard/Documents/2023-06-03_D8C9A173-D177-4C1B-8D1C-C0B1E0680EB3-overlay.png'
 
 overlay_png_on_mp4(mp4_path, png_path, processed_folder) 
-
-def overlay_png_on_jpeg(jpeg_path, png_path, processed_folder):
-    """Overlay PNG on JPEG and save in processed folder."""
-    output_path = os.path.join(processed_folder, os.path.basename(jpeg_path).replace("-main.jpg", "_combined.jpg"))
-    
-    if os.path.exists(png_path):
-        image = Image.open(jpeg_path).convert("RGBA")
-        overlay = Image.open(png_path).convert("RGBA").resize(image.size, Image.LANCZOS)
-        # Blend images
-        combined = Image.alpha_composite(image, overlay)
-        Image.alpha_composite(image, overlay).convert("RGB").save(output_path, "JPEG")
-    else:
-        print(f'no associated png file for {jpeg_path}')
-        shutil.copy(jpeg_path, output_path) 
-
-jpeg_file = "/Users/samsheppard/Documents/photos/mydata~1740319422270/memories/test/2024-10-23_2C4A687F-4679-404E-B110-EAEC6E47127C-main.jpg"
-png_file = "/Users/samsheppard/Documents/photos/mydata~1740319422270/memories/test/2024-10-23_2C4A687F-4679-404E-B110-EAEC6E47127C-overlay.png"
-
-overlay_png_on_jpeg(jpeg_file, png_file, processed_folder)
