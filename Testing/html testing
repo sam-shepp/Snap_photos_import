@@ -1,0 +1,40 @@
+from bs4 import BeautifulSoup
+import os
+import shutil
+from PIL import Image
+import datetime
+import cv2
+from tqdm import tqdm
+from moviepy.editor import VideoFileClip, ImageClip, CompositeVideoClip
+
+
+# Output directory for processed files
+output_dir = "/Users/samsheppard/Documents/photos/testing"
+os.makedirs(output_dir, exist_ok=True)
+
+def process_video_with_overlay(video_path, overlay_path, output_path):
+    """Apply an overlay image on a video and save the result only."""
+    output_name = f"{date}_{os.path.basename(media_path)}"
+    output_path = os.path.join(output_dir, output_name)
+    
+    try:
+        video = VideoFileClip(video_path)
+        overlay = ImageClip(overlay_path, ismask=False)
+        
+        # Resize overlay to match video size
+        overlay = overlay.set_duration(video.duration).resize(height=video.h, width=video.w)
+
+        # Combine overlay with video
+        final = CompositeVideoClip([video, overlay])
+
+        # Write the combined video to output
+        final.write_videofile(output_path, codec='libx264', fps=video.fps)
+    except Exception as e:
+        print(f"❌ Error processing video: {video_path}")
+        print(f"   → {e}")
+
+video_path = "/Users/samsheppard/Documents/photos/2018-06-21_966C9469-B6C6-4643-88FA-450CBE45DEDA-main.mp4"
+overlay_path = "/Users/samsheppard/Documents/photos/2018-06-21_966C9469-B6C6-4643-88FA-450CBE45DEDA-overlay.png"
+output_path = "/Users/samsheppard/Documents/photos/combined.mp4"
+
+process_video_with_overlay(video_path, overlay_path, output_path)
