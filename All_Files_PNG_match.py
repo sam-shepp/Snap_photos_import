@@ -20,7 +20,7 @@ def mp4_update_metadata(file_path):
 
     if match:
         year, month, day = match.groups()
-        print(f"Year: {year}, Month: {month}, Day: {day}")
+        #print(f"Year: {year}, Month: {month}, Day: {day}")
 
         # Convert to MP4 date format (ISO 8601: YYYY-MM-DDTHH:MM:SS)
         new_date = f"{year}-{month}-{day}T00:00:00"
@@ -47,7 +47,7 @@ def mp4_update_metadata(file_path):
                 .run(overwrite_output=True)
             )
 
-            print(f"Metadata updated successfully: {output_path}")
+            #print(f"Metadata updated successfully: {output_path}")
 
             # Replace original file with the updated one
             os.replace(output_path, file_path)
@@ -75,7 +75,7 @@ def jpeg_update_metadata(file_name):
         exif_bytes = piexif.dump(exif_dict)
         piexif.insert(exif_bytes, file_name)
         #print when complete
-        print('Date change complete')
+        #print('Date change complete')
     else:
         print("No matching pattern found in the filename.")
 
@@ -90,9 +90,9 @@ def overlay_png_on_jpeg(jpeg_path, png_path, processed_folder):
         # Blend images
         combined = Image.alpha_composite(image, overlay)
         Image.alpha_composite(image, overlay).convert("RGB").save(output_path, "JPEG")
-        print("overlay added")
+        #print("overlay added")
     else:
-        print(f'no associated png file for {jpeg_path}')
+        #print(f'no associated png file for {jpeg_path}')
         shutil.copy(jpeg_path, output_path) 
 
     return output_path
@@ -104,7 +104,7 @@ def overlay_png_on_mp4(mp4_path, png_path, processed_folder):
     processing_path = os.path.join(processed_folder, os.path.basename(mp4_path).replace("-main.mp4", "_combined.mp4"))
 
     if os.path.exists(png_path):
-        print(f'processing_path: {processing_path}')
+        #print(f'processing_path: {processing_path}')
 
         # Get MP4 resolution
         probe = ffmpeg.probe(mp4_path)
@@ -112,7 +112,7 @@ def overlay_png_on_mp4(mp4_path, png_path, processed_folder):
         if video_stream:
             width = video_stream["width"]
             height = video_stream["height"]
-            print(f"MP4 Dimensions: {width}x{height}")
+            #print(f"MP4 Dimensions: {width}x{height}")
 
             if width > height:
                 # Use FFmpeg to scale the overlay to match the MP4 resolution
@@ -121,7 +121,7 @@ def overlay_png_on_mp4(mp4_path, png_path, processed_folder):
                     vf=f"[0:v]scale={height}:{width}[video]; movie={png_path},scale={height}:{width}[watermark]; [video][watermark] overlay=0:0",
                 ).global_args('-loglevel', 'error').run(overwrite_output=True)
 
-                print('finished processing file')
+                #print('finished processing file')
             else:
                 # Use FFmpeg to scale the overlay to match the MP4 resolution
                 ffmpeg.input(mp4_path).output(
@@ -129,9 +129,9 @@ def overlay_png_on_mp4(mp4_path, png_path, processed_folder):
                     vf=f"[0:v]scale={width}:{height}[video]; movie={png_path},scale={width}:{height}[watermark]; [video][watermark] overlay=0:0",
                 ).global_args('-loglevel', 'error').run(overwrite_output=True)
 
-                print('finished processing file')
+                #print('finished processing file')
     else:
-        print(f'no associated png file for {mp4_path}')
+        #print(f'no associated png file for {mp4_path}')
         shutil.copy(mp4_path, processing_path)
 
     return processing_path
@@ -172,7 +172,7 @@ with tqdm(total=len(all_files), desc="Processing Files", unit="file") as pbar:
     for file_name in all_files:
         full_path = os.path.join(folder_path, file_name)
         count += 1
-        print(f"\nProcessing file {count}/{total_files}: {file_name}")
+        #print(f"\nProcessing file {count}/{total_files}: {file_name}")
         pbar.update(1)
 
         try:
