@@ -23,88 +23,106 @@ def normalize_path(path):
 
 def apply_overlay(base_img_path, overlay_img_path, output_path):
     """Apply an overlay image on top of a base image."""
-    base = Image.open(base_img_path).convert("RGBA")
-    overlay = Image.open(overlay_img_path).convert("RGBA")
-    
-    # Resize overlay to match base dimensions
-    overlay = overlay.resize(base.size, Image.LANCZOS)
-    
-    # Composite the images
-    combined = Image.alpha_composite(base, overlay)
-    
-    # Save the combined image
-    combined.convert("RGB").save(output_path)
+    try:
+        base = Image.open(base_img_path).convert("RGBA")
+        overlay = Image.open(overlay_img_path).convert("RGBA")
+        
+        # Resize overlay to match base dimensions
+        overlay = overlay.resize(base.size, Image.LANCZOS)
+        
+        # Composite the images
+        combined = Image.alpha_composite(base, overlay)
+        
+        # Save the combined image
+        combined.convert("RGB").save(output_path)
+
+    except Exception as e:
+        print(f"❌ Error processing image overlay: {base_img_path} with {overlay_img_path}")
+        print(f"   → {e}")
 
 def process_video_with_overlay(video_path, overlay_path, output_path):
-    """Apply an overlay image on a video and save both original and overlayed versions."""
-    cap = cv2.VideoCapture(video_path)
+    """Apply an overlay image on a video and save the result only."""
+    try:
+        cap = cv2.VideoCapture(video_path)
 
-    # Get video properties
-    fps = int(cap.get(cv2.CAP_PROP_FPS))
-    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        if not cap.isOpened():
+            print(f"❌ Could not open video: {video_path}")
+            return
 
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        # Get video properties
+        fps = int(cap.get(cv2.CAP_PROP_FPS))
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-    # Save the original MP4
-    original_output_path = output_path.replace(".mp4", "_original.mp4")
-    shutil.copy(video_path, original_output_path)
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
-    # Create overlayed MP4
-    overlayed_output_path = output_path.replace(".mp4", "_with_overlay.mp4")
-    out = cv2.VideoWriter(overlayed_output_path, fourcc, fps, (width, height))
+        # Create video writer for overlayed output
+        out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
-    overlay_img = cv2.imread(overlay_path)
-    overlay_resized = cv2.resize(overlay_img, (width, height))
+        overlay_img = cv2.imread(overlay_path)
+        if overlay_img is None:
+            print(f"❌ Could not read overlay image: {overlay_path}")
+            cap.release()
+            return
 
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
+        overlay_resized = cv2.resize(overlay_img, (width, height))
 
-        # Blend the frame with the overlay
-        combined = cv2.addWeighted(frame, 0.8, overlay_resized, 0.2, 0)
-        out.write(combined)
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
 
-    cap.release()
-    out.release()
+            # Blend the frame with the overlay
+            combined = cv2.addWeighted(frame, 0.8, overlay_resized, 0.2, 0)
+            out.write(combined)
 
-    print(f"✅ Saved original: {original_output_path}")
-    print(f"✅ Saved overlayed: {overlayed_output_path}")
+        cap.release()
+        out.release()
+
+        print(f"✅ Saved overlayed video: {output_path}")
+
+    except Exception as e:
+        print(f"❌ Error processing video: {video_path}")
+        print(f"   → {e}")
 
 def extract_metadata_and_save(media_path, date, overlay_path=None):
     """Save image/video with metadata and apply overlay if present."""
-    media_path = normalize_path(media_path)
-    overlay_path = normalize_path(overlay_path) if overlay_path else None
+    try:
+        media_path = normalize_path(media_path)
+        overlay_path = normalize_path(overlay_path) if overlay_path else None
 
-    if not os.path.exists(media_path):
-        print(f"⚠️ Missing file: {media_path}")
-        return
+        if not os.path.exists(media_path):
+            print(f"⚠️ Missing file: {media_path}")
+            return
 
-    file_ext = os.path.splitext(media_path)[1].lower()
-    output_name = f"{date}_{os.path.basename(media_path)}"
-    output_path = os.path.join(output_dir, output_name)
+        file_ext = os.path.splitext(media_path)[1].lower()
+        output_name = f"{date}_{os.path.basename(media_path)}"
+        output_path = os.path.join(output_dir, output_name)
 
-    if file_ext in ['.jpg', '.jpeg', '.png']:
-        if overlay_path and os.path.exists(overlay_path):
-            apply_overlay(media_path, overlay_path, output_path)
-        else:
-            shutil.copy(media_path, output_path)
+        if file_ext in ['.jpg', '.jpeg', '.png']:
+            if overlay_path and os.path.exists(overlay_path):
+                apply_overlay(media_path, overlay_path, output_path)
+            else:
+                shutil.copy(media_path, output_path)
 
-        # Set metadata date
-        timestamp = datetime.datetime.strptime(date, "%Y-%m-%d").timestamp()
-        os.utime(output_path, (timestamp, timestamp))
+            # Set metadata date
+            timestamp = datetime.datetime.strptime(date, "%Y-%m-%d").timestamp()
+            os.utime(output_path, (timestamp, timestamp))
 
-    elif file_ext == '.mp4':
-        if overlay_path and os.path.exists(overlay_path):
-            process_video_with_overlay(media_path, overlay_path, output_path)
-        else:
-            # Just copy the original MP4 if no overlay
-            shutil.copy(media_path, output_path)
+        elif file_ext == '.mp4':
+            if overlay_path and os.path.exists(overlay_path):
+                # Only save the overlayed version
+                process_video_with_overlay(media_path, overlay_path, output_path)
+            else:
+                shutil.copy(media_path, output_path)
 
-        # Set metadata date
-        timestamp = datetime.datetime.strptime(date, "%Y-%m-%d").timestamp()
-        os.utime(output_path, (timestamp, timestamp))
+            # Set metadata date
+            timestamp = datetime.datetime.strptime(date, "%Y-%m-%d").timestamp()
+            os.utime(output_path, (timestamp, timestamp))
+
+    except Exception as e:
+        print(f"❌ Error processing file: {media_path}")
+        print(f"   → {e}")
 
 def main():
     """Main script execution."""
@@ -116,19 +134,24 @@ def main():
     # Display the progress bar
     with tqdm(total=len(containers), desc="Processing Media", unit="file") as pbar:
         for container in containers:
-            img = container.find("img")
-            video = container.find("video")
-            date_element = container.find(class_="text-line")
-            date = date_element.text if date_element else "unknown_date"
+            try:
+                img = container.find("img")
+                video = container.find("video")
+                date_element = container.find(class_="text-line")
+                date = date_element.text if date_element else "unknown_date"
 
-            overlay = container.find("img", class_="overlay-image")
-            overlay_path = overlay['src'] if overlay else None
+                overlay = container.find("img", class_="overlay-image")
+                overlay_path = overlay['src'] if overlay else None
 
-            media_path = img['src'] if img else video['src'] if video else None
+                media_path = img['src'] if img else video['src'] if video else None
 
-            if media_path:
-                extract_metadata_and_save(media_path, date, overlay_path)
+                if media_path:
+                    extract_metadata_and_save(media_path, date, overlay_path)
 
+            except Exception as e:
+                print(f"❌ Unexpected error in container: {container}")
+                print(f"   → {e}")
+            
             pbar.update(1)  # Increment the progress bar
 
     print("✅ Export completed!")
