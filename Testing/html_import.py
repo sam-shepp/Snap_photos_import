@@ -5,6 +5,7 @@ from PIL import Image
 import datetime
 import cv2
 from tqdm import tqdm
+from moviepy.editor import VideoFileClip, ImageClip, CompositeVideoClip
 
 # Path to the HTML file
 html_file = "/Users/samsheppard/Documents/photos/mydata~1740319422270/memories/memories.html"
@@ -43,44 +44,17 @@ def apply_overlay(base_img_path, overlay_img_path, output_path):
 def process_video_with_overlay(video_path, overlay_path, output_path):
     """Apply an overlay image on a video and save the result only."""
     try:
-        cap = cv2.VideoCapture(video_path)
+        video = VideoFileClip(video_path)
+        overlay = ImageClip(overlay_path, ismask=False)
+        
+        # Resize overlay to match video size
+        overlay = overlay.set_duration(video.duration).resize(height=video.h, width=video.w)
 
-        if not cap.isOpened():
-            print(f"❌ Could not open video: {video_path}")
-            return
+        # Combine overlay with video
+        final = CompositeVideoClip([video, overlay.set_position("center")])
 
-        # Get video properties
-        fps = int(cap.get(cv2.CAP_PROP_FPS))
-        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-
-        # Create video writer for overlayed output
-        out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
-
-        overlay_img = cv2.imread(overlay_path)
-        if overlay_img is None:
-            print(f"❌ Could not read overlay image: {overlay_path}")
-            cap.release()
-            return
-
-        overlay_resized = cv2.resize(overlay_img, (width, height))
-
-        while cap.isOpened():
-            ret, frame = cap.read()
-            if not ret:
-                break
-
-            # Blend the frame with the overlay
-            combined = cv2.addWeighted(frame, 0.8, overlay_resized, 0.2, 0)
-            out.write(combined)
-
-        cap.release()
-        out.release()
-
-        print(f"✅ Saved overlayed video: {output_path}")
-
+        # Write the combined video to output
+        final.write_videofile(output_path, codec='libx264', fps=video.fps)
     except Exception as e:
         print(f"❌ Error processing video: {video_path}")
         print(f"   → {e}")
