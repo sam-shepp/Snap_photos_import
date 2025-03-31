@@ -153,8 +153,9 @@ if not folder_path:
 processed_folder = os.path.join(folder_path, "processed")
 os.makedirs(processed_folder, exist_ok=True)
 
-# Get list of files to process
-all_files = [f for f in os.listdir(folder_path) if f.lower().endswith((".mp4", ".jpg"))]
+# Get list of files to process, excluding macOS temporary files
+all_files = [f for f in os.listdir(folder_path) 
+             if f.lower().endswith((".mp4", ".jpg")) and not f.startswith("._")]
 total_files = len(all_files)
 
 #print(f"Total files to process: {total_files}\n")
