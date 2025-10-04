@@ -1,26 +1,51 @@
-**Snapchat photo importing and metadata updates** 
+Here's a sample README file based on the information you provided:
 
-**Purpose:**
-The reason for this tools development was to move photos and videos from snapchat memories storage and into my camera roll onto my iPhone.
+**Snapchat Photo Importer and Metadata Updater**
 
-When doing it through the snapchat UI I found that you could only export a maximum of 20 photos at a time into the camera roll and no metadata was exported. It is possible that you can export all of your media through the snapchat settings which will generate a series of zip files that can be downloaded but will also have no associated metadata for the mp4 files or jpeg files.
+**Introduction**
+The purpose of this tool is to extract photos and videos from Snapchat Memories storage and import them into your iPhone's Camera Roll, preserving metadata.
 
-When you export your data the zip files will contain the html file pointing at all the media and each media file individually and an overlay file if there is any text of filters applied to the media content. 
+**Background**
+When exporting media from Snapchat using their UI, users are limited to 20 photos at a time with no metadata exported. However, it's possible to export all media through the Snapchat settings, resulting in separate zip files without associated metadata for MP4 and JPEG files.
 
 **Process**
-To compelte the process of taking your media content from Snapchat into you camera roll ensure you complete the following steps:
 
+### Exporting Media from Snapchat
 
-**1.**
-Export media from snapchat using the UI. As suggested above this can be done through the app and after some time after the requet is submitted you will recieve an email with a link to download your content as zip files. these are all separated into zip files containing 10Gb of media.
+1. Use the Snapchat app to export your media content.
+2. After submitting the request, wait for an email with a link to download your content as zip files.
+3. These zip files will contain individual media files and an overlay file (if applicable).
 
-**2.** 
-Once the folders have been unzipped run the main.py file and select the folder where the content is stored. This will create a new folder within thes structure called 'processed' which will contain all the final processes files.
+### Importing Media into Camera Roll
 
-**3.**
-(best performed on a macbook)
-Select all on the output folder and drag those into the apple photos app. This can aslo be done for anywhere else you would like to store your media content.
+1. Unzip the downloaded zip files containing 10GB of media.
+2. Run the `main.py` file, selecting the folder where the content is stored.
+3. A new "processed" folder will be created within the structure, containing all final processed files.
 
+**Best Practices (on a MacBook)**
 
-**notes**
-This started as a personal project but due to recent news from snapchat on the removal of free stoarage for users I thought it would be good to make this project public. All contributions for improvements are welcome!
+* Select all output files and drag them into the Apple Photos app to store your media content.
+
+**Note**
+
+This project was initially developed as a personal endeavor due to recent Snapchat news about removing free storage for users. We're now making it publicly available. Contributions for improvements are welcome!
+
+### Contributing
+
+If you'd like to contribute to this project, please feel free to fork the repository and submit pull requests with your improvements.
+
+### Requirements
+
+* Python 3.x
+* Pillow (PIL) library for image processing
+* piexif library for metadata extraction
+* mutagen library for MP4 file management
+* ffmpeg-python library for video processing
+* tkinter library for GUI interactions
+* tqdm library for progress bar display
+* shutil library for file management
+
+### Installation
+
+1. Clone the repository using `git clone https://github.com/sam-shepp/Snap_photos_import.git`
+2. Install required libraries by running `pip install -r requirements.txt`
