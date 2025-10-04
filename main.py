@@ -143,112 +143,113 @@ def select_folder():
     folder_path = filedialog.askdirectory(title="Select Folder Containing Media Files")
     return folder_path
 
-# Select folder via file dialog
-folder_path = select_folder()
-if not folder_path:
-    #print("No folder selected. Exiting...")
-    exit()
+if __name__ == "__main__":
+    # Select folder via file dialog
+    folder_path = select_folder()
+    if not folder_path:
+        #print("No folder selected. Exiting...")
+        exit()
 
-# Create a processed folder inside the same directory
-processed_folder = os.path.join(folder_path, "processed")
-os.makedirs(processed_folder, exist_ok=True)
+    # Create a processed folder inside the same directory
+    processed_folder = os.path.join(folder_path, "processed")
+    os.makedirs(processed_folder, exist_ok=True)
 
-# Get list of files to process
-all_files = [f for f in os.listdir(folder_path) if f.lower().endswith((".mp4", ".jpg"))]
-total_files = len(all_files)
+    # Get list of files to process
+    all_files = [f for f in os.listdir(folder_path) if f.lower().endswith((".mp4", ".jpg"))]
+    total_files = len(all_files)
 
-#print(f"Total files to process: {total_files}\n")
+    #print(f"Total files to process: {total_files}\n")
 
-# Counters
-count = 0
-processed_mp4 = 0
-processed_jpeg = 0
-skipped = 0
-skipped_files = []
+    # Counters
+    count = 0
+    processed_mp4 = 0
+    processed_jpeg = 0
+    skipped = 0
+    skipped_files = []
 
-# Process files with a progress bar
-with tqdm(total=len(all_files), desc="Processing Files", unit="file") as pbar:
-    # Loop through files in the folder
-    for file_name in all_files:
-        full_path = os.path.join(folder_path, file_name)
-        count += 1
-        print(f"\nProcessing file {count}/{total_files}: {file_name}")
-        pbar.update(1)
+    # Process files with a progress bar
+    with tqdm(total=len(all_files), desc="Processing Files", unit="file") as pbar:
+        # Loop through files in the folder
+        for file_name in all_files:
+            full_path = os.path.join(folder_path, file_name)
+            count += 1
+            print(f"\nProcessing file {count}/{total_files}: {file_name}")
+            pbar.update(1)
 
-        try:
-            # Process accordingly
-            if file_name.lower().endswith(".mp4"):
-                # Find corresponding PNG overlay
-                png_path = full_path.replace("-main.mp4", "-overlay.png")
-                new_path = overlay_png_on_mp4(full_path, png_path, processed_folder)
-                mp4_update_metadata(new_path)
-                processed_mp4 += 1
+            try:
+                # Process accordingly
+                if file_name.lower().endswith(".mp4"):
+                    # Find corresponding PNG overlay
+                    png_path = full_path.replace("-main.mp4", "-overlay.png")
+                    new_path = overlay_png_on_mp4(full_path, png_path, processed_folder)
+                    mp4_update_metadata(new_path)
+                    processed_mp4 += 1
 
-            elif file_name.lower().endswith((".jpg")):
-                # Find corresponding PNG overlay
-                png_path = full_path.replace("-main.jpg", "-overlay.png")
-                new_path = overlay_png_on_jpeg(full_path, png_path, processed_folder)
-                jpeg_update_metadata(new_path)
-                processed_jpeg += 1
-        except:
-            print(f'skipping: {file_name}')
-            skipped_files.append(file_name)
-            skipped = skipped + 1
-
-
-# Print final summary
-print("\nProcessing complete!")
-print(f"Total MP4 files processed: {processed_mp4}")
-print(f"Total JPEG files processed: {processed_jpeg}")
-print(f"Total files processed: {processed_mp4 + processed_jpeg}")
-print(f"Total files skipped: {skipped}")
-
-print('skipped files:')
-print(skipped_files)
-
-count = 0
-processed_mp4 = 0
-processed_jpeg = 0
-skipped = 0
-Second_skipped_files = []
-
-print('retrying skipped files')
-# Process files with a progress bar
-with tqdm(total=len(skipped_files), desc="Processing Files", unit="file") as pbar:
-    # Loop through files in the folder
-    for file_name in skipped_files:
-        full_path = os.path.join(folder_path, file_name)
-        count += 1
-        print(f"\nProcessing file {count}/{total_files}: {file_name}")
-        pbar.update(1)
-
-        try:
-            # Process accordingly
-            if file_name.lower().endswith(".mp4"):
-                # Find corresponding PNG overlay
-                png_path = full_path.replace("-main.mp4", "-overlay.png")
-                new_path = overlay_png_on_mp4(full_path, png_path, processed_folder)
-                mp4_update_metadata(new_path)
-                processed_mp4 += 1
-
-            elif file_name.lower().endswith((".jpg")):
-                # Find corresponding PNG overlay
-                png_path = full_path.replace("-main.jpg", "-overlay.png")
-                new_path = overlay_png_on_jpeg(full_path, png_path, processed_folder)
-                jpeg_update_metadata(new_path)
-                processed_jpeg += 1
-        except:
-            print(f'skipping: {file_name}')
-            Second_skipped_files.append(file_name)
-            skipped = skipped + 1
+                elif file_name.lower().endswith((".jpg")):
+                    # Find corresponding PNG overlay
+                    png_path = full_path.replace("-main.jpg", "-overlay.png")
+                    new_path = overlay_png_on_jpeg(full_path, png_path, processed_folder)
+                    jpeg_update_metadata(new_path)
+                    processed_jpeg += 1
+            except:
+                print(f'skipping: {file_name}')
+                skipped_files.append(file_name)
+                skipped = skipped + 1
 
 
-# Print final summary
-print("\nProcessing complete!")
-print(f"Total MP4 files processed: {processed_mp4}")
-print(f"Total JPEG files processed: {processed_jpeg}")
-print(f"Total files processed: {processed_mp4 + processed_jpeg}")
-print(f"Total files skipped: {skipped}")
+    # Print final summary
+    print("\nProcessing complete!")
+    print(f"Total MP4 files processed: {processed_mp4}")
+    print(f"Total JPEG files processed: {processed_jpeg}")
+    print(f"Total files processed: {processed_mp4 + processed_jpeg}")
+    print(f"Total files skipped: {skipped}")
 
-print('skipped files:')
-print(Second_skipped_files)
+    print('skipped files:')
+    print(skipped_files)
+
+    count = 0
+    processed_mp4 = 0
+    processed_jpeg = 0
+    skipped = 0
+    Second_skipped_files = []
+
+    print('retrying skipped files')
+    # Process files with a progress bar
+    with tqdm(total=len(skipped_files), desc="Processing Files", unit="file") as pbar:
+        # Loop through files in the folder
+        for file_name in skipped_files:
+            full_path = os.path.join(folder_path, file_name)
+            count += 1
+            print(f"\nProcessing file {count}/{total_files}: {file_name}")
+            pbar.update(1)
+
+            try:
+                # Process accordingly
+                if file_name.lower().endswith(".mp4"):
+                    # Find corresponding PNG overlay
+                    png_path = full_path.replace("-main.mp4", "-overlay.png")
+                    new_path = overlay_png_on_mp4(full_path, png_path, processed_folder)
+                    mp4_update_metadata(new_path)
+                    processed_mp4 += 1
+
+                elif file_name.lower().endswith((".jpg")):
+                    # Find corresponding PNG overlay
+                    png_path = full_path.replace("-main.jpg", "-overlay.png")
+                    new_path = overlay_png_on_jpeg(full_path, png_path, processed_folder)
+                    jpeg_update_metadata(new_path)
+                    processed_jpeg += 1
+            except:
+                print(f'skipping: {file_name}')
+                Second_skipped_files.append(file_name)
+                skipped = skipped + 1
+
+
+    # Print final summary
+    print("\nProcessing complete!")
+    print(f"Total MP4 files processed: {processed_mp4}")
+    print(f"Total JPEG files processed: {processed_jpeg}")
+    print(f"Total files processed: {processed_mp4 + processed_jpeg}")
+    print(f"Total files skipped: {skipped}")
+
+    print('skipped files:')
+    print(Second_skipped_files)

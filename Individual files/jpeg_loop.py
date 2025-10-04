@@ -4,13 +4,13 @@ from PIL import Image
 from datetime import datetime
 import piexif
 
-#funciton that takes out the date from the pattern in the image title
+count=0
+
 def extract_data_from_filename(file_name):
     # Extracting data using regular expressions
     pattern = r'(\d{4})-(\d{2})-(\d{2})'  # Assuming the date is in the format YYYY-MM-DD
     match = re.search(pattern, file_name)
 
-    #If statement that is able to chang the metadata of the jpg file
     if match:
         year, month, day = match.groups()
         print(f"Year: {year}, Month: {month}, Day: {day}")
@@ -24,16 +24,16 @@ def extract_data_from_filename(file_name):
         piexif.insert(exif_bytes, file_name)
         #print when complete
         print('Date change complete')
-    #print when fails
     else:
         print("No matching pattern found in the filename.")
 
-#***** PROGRAMME INCOMPLETE *****
-#CURRENTLY ONLY POSSIBLE FOR SPECIFIED Image
-#NEXT JOB IS TO SET A LOOP FUNCTION TO GO THROUGH ALL JPG FILES AND THEN REPEAT FOR ALL MP4 FILES.
-        
-# call specific file name for function
-file_name = "/Users/samsheppard/Documents/Personal/memories/2022-04-14_CDD8E131-7D0D-40CE-95A5-FE7D21F2588B-main.mp4"
-extract_data_from_filename(file_name)
+path = ''
 
+for file_name in os.listdir(path):
+    full_path = os.path.join(path, file_name)
+    count = count +1
+    print(count)
+    print(file_name)
+    print(full_path)
+    extract_data_from_filename(full_path)
 

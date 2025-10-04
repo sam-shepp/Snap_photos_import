@@ -1,0 +1,5 @@
+Pillow
+piexif
+mutagen
+ffmpeg-python
+tqdm

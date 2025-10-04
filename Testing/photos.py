@@ -12,6 +12,3 @@ def extract_data_from_filename(file_name):
     else:
         print("No matching pattern found in the filename.")
 
-# Example usage
-file_name = "/Users/samsheppard/Documents/Personal/memories/2024-01-18_DC7D2CD8-8DFC-4063-988F-375AF2732A5A-main.jpg"
-extract_data_from_filename(file_name)

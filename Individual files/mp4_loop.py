@@ -34,7 +34,7 @@ def extract_date_from_filename(file_path):
         print("No matching date pattern found in the filename.")
 
 # Example file path
-folder_path = "/Users/samsheppard/Documents/Personal/memories"
+folder_path = ""
 
 
 for file_name in os.listdir(folder_path):

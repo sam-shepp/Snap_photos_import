@@ -59,9 +59,3 @@ def extract_date_from_filename(file_path):
         print("No matching date pattern found in the filename.")
 
 
-
-# Example file path
-file_path = "/Users/samsheppard/Documents/photos/mydata~1740319422270/memories/processed/2018-07-17_4BB9636E-A96E-4762-9E6A-DC42A8F8ACF7_combined.mp4"
-
-# Run function
-extract_date_from_filename(file_path)

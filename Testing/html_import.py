@@ -8,13 +8,13 @@ from tqdm import tqdm
 from moviepy.editor import VideoFileClip, ImageClip, CompositeVideoClip
 
 # Path to the HTML file
-html_file = "/Users/samsheppard/Documents/photos/mydata~1740319422270/memories/memories.html"
+html_file = ".memories/memories.html"
 
 # Use the same directory as the HTML file for media files
 media_dir = os.path.dirname(html_file)
 
 # Output directory for processed files
-output_dir = "/Users/samsheppard/Documents/photos/processed_media"
+output_dir = "./processed_media"
 os.makedirs(output_dir, exist_ok=True)
 
 def normalize_path(path):

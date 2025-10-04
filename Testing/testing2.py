@@ -11,10 +11,9 @@ import tkinter as tk
 from tkinter import filedialog
 from tqdm import tqdm
 
-mp4_file = "/Users/samsheppard/Documents/photos/mydata~1740319422270/memories/processed/2018-06-21_966C9469-B6C6-4643-88FA-450CBE45DEDA-main_combined.mp4"
 
 
-folder_path = '/Users/samsheppard/Documents/'
+folder_path = ''
 
 def overlay_png_on_mp4(mp4_path, processed_folder):
     """Overlay a resized PNG onto an MP4 and save in processed folder (quiet mode)."""
@@ -58,5 +57,3 @@ def overlay_png_on_mp4(mp4_path, processed_folder):
         print(f"FFmpeg error when probing {mp4_path}: {e}")
     except Exception as e:
         print(f"Unexpected error: {e}")
-
-overlay_png_on_mp4(mp4_file, folder_path)

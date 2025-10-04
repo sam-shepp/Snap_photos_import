@@ -7,20 +7,7 @@ from PIL import Image
 import piexif
 import ffmpeg
 import moviepy
-'''
-def overlay_png_on_jpeg(jpeg_path, png_path, processed_folder):
-    """Overlay PNG on JPEG and save in processed folder."""
-    if os.path.exists(png_path):
-        image = Image.open(jpeg_path).convert("RGBA")
-        overlay = Image.open(png_path).convert("RGBA").resize(image.size, Image.ANTIALIAS)
-        # Blend images
-        combined = Image.alpha_composite(image, overlay)
-        output_path = os.path.join(processed_folder, os.path.basename(jpeg_path).replace(".jpg", "_overlay.jpg").replace(".jpeg", "_overlay.jpeg"))
-        Image.alpha_composite(image, overlay).convert("RGB").save(output_path, "JPEG")
-
-jpeg_path = '/Users/samsheppard/Documents/2024-10-23_2C4A687F-4679-404E-B110-EAEC6E47127C-main_overlay.jpg'
-png_path = '/Users/samsheppard/Documents/2024-10-23_2C4A687F-4679-404E-B110-EAEC6E47127C-overlay.png'''
-folder_path = '/Users/samsheppard/Documents/'
+folder_path = ''
 
 # Create a processed folder inside the same directory
 processed_folder = os.path.join(folder_path, "processed")
@@ -47,8 +34,3 @@ def overlay_png_on_mp4(mp4_path, png_path, processed_folder):
                 vf=f"[0:v]scale={width}:{height}[video]; movie={png_path},scale={width}:{height}[watermark]; [video][watermark] overlay=0:0",
             ).global_args('-loglevel', 'quiet').run(overwrite_output=True)
 
-
-mp4_path = '/Users/samsheppard/Documents/2023-06-03_D8C9A173-D177-4C1B-8D1C-C0B1E0680EB3-main.mp4'
-png_path = '/Users/samsheppard/Documents/2023-06-03_D8C9A173-D177-4C1B-8D1C-C0B1E0680EB3-overlay.png'
-
-overlay_png_on_mp4(mp4_path, png_path, processed_folder) 

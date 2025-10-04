@@ -27,8 +27,6 @@ def extract_data_from_filename(file_name):
     else:
         print("No matching pattern found in the filename.")
 
-path = '/Users/samsheppard/Documents/Personal/memories/JPG'
-
 for file_name in os.listdir(path):
     full_path = os.path.join(path, file_name)
     count = count +1

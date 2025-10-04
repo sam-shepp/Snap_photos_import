@@ -1,5 +1,26 @@
-This tool has been developed to migrate photos off snapchat and into the icloud camera roll.
+**Snapchat photo importing and metadata updates** 
 
-I started making this tool as I wanted to move from snapchat but I have many photos and memories stored on there still. 
+**Purpose:**
+The reason for this tools development was to move photos and videos from snapchat memories storage and into my camera roll onto my iPhone.
 
-When trying to move photos off manually, it because effort most photos metadata not being accurate so photos were not stored in order.
+When doing it through the snapchat UI I found that you could only export a maximum of 20 photos at a time into the camera roll and no metadata was exported. It is possible that you can export all of your media through the snapchat settings which will generate a series of zip files that can be downloaded but will also have no associated metadata for the mp4 files or jpeg files.
+
+When you export your data the zip files will contain the html file pointing at all the media and each media file individually and an overlay file if there is any text of filters applied to the media content. 
+
+**Process**
+To compelte the process of taking your media content from Snapchat into you camera roll ensure you complete the following steps:
+
+
+**1.**
+Export media from snapchat using the UI. As suggested above this can be done through the app and after some time after the requet is submitted you will recieve an email with a link to download your content as zip files. these are all separated into zip files containing 10Gb of media.
+
+**2.** 
+Once the folders have been unzipped run the main.py file and select the folder where the content is stored. This will create a new folder within thes structure called 'processed' which will contain all the final processes files.
+
+**3.**
+(best performed on a macbook)
+Select all on the output folder and drag those into the apple photos app. This can aslo be done for anywhere else you would like to store your media content.
+
+
+**notes**
+This started as a personal project but due to recent news from snapchat on the removal of free stoarage for users I thought it would be good to make this project public. All contributions for improvements are welcome!
